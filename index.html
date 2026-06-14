@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>小地瓜AI营销 - 动态预览</title>
+    <link rel="icon" href="data:," />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #e9eef5;
+      }
+
+      .wrap {
+        width: 100vw;
+        height: 100vh;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+      }
+
+      .shell {
+        position: relative;
+        width: 100vw;
+        height: 56.25vw;
+        max-width: 100vw;
+        max-height: 100vh;
+        overflow: hidden;
+        box-shadow: 0 34px 110px rgba(38, 48, 64, 0.18);
+      }
+
+      iframe {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 1920px;
+        height: 1080px;
+        border: 0;
+        transform: scale(var(--scale, 1));
+        transform-origin: left top;
+      }
+
+      audio {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div id="shell" class="shell">
+        <iframe id="preview" src="./scene.html?captureTime=0"></iframe>
+      </div>
+    </div>
+    <audio id="music" src="./assets/audio/apple-tech-bed.mp3" loop></audio>
+    <script>
+      const iframe = document.getElementById("preview");
+      const shell = document.getElementById("shell");
+      const music = document.getElementById("music");
+      let startedAt = 0;
+
+      const fit = () => {
+        const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+        shell.style.width = `${1920 * scale}px`;
+        shell.style.height = `${1080 * scale}px`;
+        iframe.style.setProperty("--scale", scale.toString());
+      };
+
+      const tick = (now) => {
+        if (!startedAt) startedAt = now;
+        const time = ((now - startedAt) / 1000) % 30;
+        iframe.contentWindow?.setCaptureTime?.(time);
+        requestAnimationFrame(tick);
+      };
+
+      iframe.addEventListener("load", () => {
+        fit();
+        window.addEventListener("resize", fit);
+        requestAnimationFrame(tick);
+        music.volume = 0.34;
+        music.play().catch(() => {
+          window.addEventListener("pointerdown", () => music.play(), { once: true });
+        });
+      });
+    </script>
+  </body>
+</html>
